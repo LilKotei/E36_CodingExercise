@@ -168,25 +168,34 @@ We deployed the smart contract using **Hardhat**, a development framework for Et
    const { ethers } = require("hardhat");
 
    async function main() {
-       const [deployer] = await ethers.getSigners();
-       console.log("Deploying contracts with the account:", deployer.address);
+      const [deployer] = await ethers.getSigners();
 
-       const provider = ethers.provider;
-       const balance = await provider.getBalance(deployer.address);
+      console.log("Deploying contracts with the account:", deployer.address);
 
-       console.log(`Account balance (BERR): ${ethers.utils.formatUnits(balance, 18)} BERR`);
+      const provider = ethers.provider;
+      const balance = await provider.getBalance(deployer.address);
 
-       const TokenTransferrer = await ethers.getContractFactory("TokenTransferrer");
-       const tokenTransferrer = await TokenTransferrer.deploy();
+      // Affiche le solde en wei (BigInt)
+      console.log(`Account balance (wei): ${balance.toString()}`);
 
-       await tokenTransferrer.deployed();
-       console.log("Contract deployed at address:", tokenTransferrer.address);
+      // Conversion explicite de BigInt à number pour afficher le solde en BERR (assume 18 décimales)
+      const berrBalance = Number(balance) / 1e18; // Note : Cela peut poser problème si le nombre est très grand
+      console.log(`Account balance (BERR): ${berrBalance}`);
+
+      // Déploiement du contrat
+      const Contract = await ethers.getContractFactory("MyContract"); // Remplacez "MyContract" par le nom exact de votre contrat
+      const contract = await Contract.deploy(); // Ajoutez les arguments si nécessaire
+
+      await contract.deployed();
+      console.log("Contract deployed to:", contract.address);
    }
 
-   main().catch((error) => {
-       console.error("Error deploying contract:", error);
-       process.exitCode = 1;
-   });
+   main()
+      .then(() => process.exit(0))
+      .catch((error) => {
+         console.error("Erreur lors du déploiement :", error);
+         process.exit(1);
+      });
    ```
 
 4. **Run the Deployment:**
@@ -249,5 +258,5 @@ http://127.0.0.1:46861/ext/bc/YOUR_SUBNET_RPC_ENDPOINT/rpc
 
 ## **Conclusion**
 
-We successfully set up an Avalanche node, installed the Avalanche CLI, and tested its functionality. A custom Subnet, `ExerciseSubnet`, was created and deployed locally. Additionally, we implemented and deployed the **TokenTransferrer** smart contract on the Subnet, enabling token management functionalities
+We successfully set up an Avalanche node, installed the Avalanche CLI, and tested its functionality. A custom Subnet, `ExerciseSubnet`, was created and deployed locally. Additionally, we implemented and deployed the **TokenTransferrer** smart contract on the Subnet, enabling token management functionalities.
 
